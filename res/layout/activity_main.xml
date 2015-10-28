@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:umadsdk="http://schemas.android.com/apk/res/com.LoveBus"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="vertical" >
+
+    <LinearLayout
+        android:id="@+id/linearLayout1"
+        android:layout_width="fill_parent"
+        android:layout_height="50dip" >
+
+        <TextView
+            android:id="@+id/text1"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:layout_weight="1.0"
+            android:gravity="center"
+            android:text="昨日"
+            android:textColor="#000000"
+            android:textSize="22.0dip" />
+
+        <TextView
+            android:id="@+id/text2"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:layout_weight="1.0"
+            android:gravity="center"
+            android:text="今日"
+            android:textColor="#000000"
+            android:textSize="22.0dip" />
+
+        <TextView
+            android:id="@+id/text3"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:layout_weight="1.0"
+            android:gravity="center"
+            android:text="明日"
+            android:textColor="#000000"
+            android:textSize="22.0dip" />
+    </LinearLayout>
+
+    <RelativeLayout
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:orientation="vertical" >
+
+        <android.support.v4.view.ViewPager
+            android:id="@+id/vPager2"
+            android:layout_width="wrap_content"
+            android:layout_height="100dip"
+            android:layout_weight="1.0"
+            android:background="#333333"
+            android:flipInterval="30"
+            android:persistentDrawingCache="animation" >
+        </android.support.v4.view.ViewPager>
+
+        <ScrollView
+            android:id="@+id/scrollView1"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent" >
+
+            <LinearLayout
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:orientation="vertical" >
+
+                <android.support.v4.view.ViewPager
+                    android:id="@+id/vPager4"
+                    android:layout_width="wrap_content"
+                    android:layout_height="100dip"
+                    android:layout_weight="1.0"
+                    android:background="#00000000"
+                    android:flipInterval="30"
+                    android:persistentDrawingCache="animation" >
+                </android.support.v4.view.ViewPager>
+
+                <android.support.v4.view.ViewPager
+                    android:id="@+id/vPager"
+                    android:layout_width="wrap_content"
+                    android:layout_height="500dip"
+                    android:layout_weight="1.0"
+                    android:background="#999999"
+                    android:flipInterval="30"
+                    android:persistentDrawingCache="animation" >
+                </android.support.v4.view.ViewPager>
+            </LinearLayout>
+        </ScrollView>
+
+        <android.support.v4.view.ViewPager
+            android:id="@+id/vPager3"
+            android:layout_width="wrap_content"
+            android:layout_height="100dip"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentTop="true"
+            android:layout_weight="1.0"
+            android:background="#00000000"
+            android:flipInterval="30"
+            android:persistentDrawingCache="animation" >
+        </android.support.v4.view.ViewPager>
+
+    </RelativeLayout>
+
+</LinearLayout>
