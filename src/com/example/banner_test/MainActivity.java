@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import junit.framework.TestListener;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -36,7 +37,11 @@ import android.widget.Toast;
 
 import com.jeremyfeinstein.slidingmenu.lib.SlidingMenu;
 import com.jeremyfeinstein.slidingmenu.lib.app.SlidingFragmentActivity;
-
+/**
+ * 程序入口
+ * @author 芋头
+ *
+ */
 public class MainActivity extends Activity {
 	private ViewPager banner, listViewPager, banner_mask;
 	private TextView tab_1, tab_2, tab_3;
@@ -45,7 +50,23 @@ public class MainActivity extends Activity {
 	private SlidingMenu menu;
 	private ListView listView;
 	public String cal[] = { "0", "日", "一", "二", "三", "四", "五", "六" };
-	public void initMenu(){
+	private void initList(){ //用于恢复滑动菜单
+		List<String> textList=new ArrayList<String>();
+		textList.add("搜索");
+		textList.add("周一");
+		textList.add("周二");
+		textList.add("周三");
+		textList.add("周四");
+		textList.add("周五");
+		textList.add("周六");
+		textList.add("周日");
+		textList.add("设置");
+		textList.add("退出");
+		ArrayAdapter<String> adapter=new ArrayAdapter<String>(menu.getContext(), android.R.layout.simple_list_item_1, textList);
+		listView.setAdapter(adapter);
+	}
+	boolean menuBoole=true; //用于判断是不是默认菜单
+	public void initMenu(){//初始化菜单
 		menu=new SlidingMenu(this);
 		menu.setMode(SlidingMenu.LEFT);
 		menu.setTouchModeAbove(SlidingMenu.TOUCHMODE_MARGIN);
@@ -69,15 +90,16 @@ public class MainActivity extends Activity {
 		menu.toggle();
 		ArrayAdapter<String> adapter=new ArrayAdapter<String>(menu.getContext(), android.R.layout.simple_list_item_1, textList);
 		listView.setAdapter(adapter);
-		listView.setOnItemClickListener(new OnItemClickListener() {
+		listView.setOnItemClickListener(new OnItemClickListener() { //菜单的监听
 			 AlertDialog.Builder builder;
 			 View view2;
 			 EditText editText;
 			@Override
-			public void onItemClick(AdapterView<?> parent, View view,
-					int position, long id) {
+			public void onItemClick(final AdapterView<?> parent, View view,
+					final int position, long id) {
 				// TODO Auto-generated method stub
-				if(position==0){
+				if(menuBoole&&position==0){ //如果是”搜索“被点击
+					
 					builder=new AlertDialog.Builder(MainActivity.this);
 					LayoutInflater inflater=LayoutInflater.from(menu.getContext());
 					view2 =inflater.inflate(R.layout.diost, null);
@@ -101,7 +123,7 @@ public class MainActivity extends Activity {
 							intent.putExtra("position", -1);
 							intent.putExtra("edit", editText.getText().toString());
 							 msg=new Message();
-							new Thread(new Runnable() {
+							new Thread(new Runnable() {//收集数据
 								
 								@Override
 								public void run() {
@@ -120,7 +142,7 @@ public class MainActivity extends Activity {
 									List<Datas> list=MainActivity.this.getXF_Info();
 									bundle.putSerializable("info", (Serializable) list);
 									intent.putExtra("list", bundle);
-									menu.getContext().startActivity(intent);
+									menu.getContext().startActivity(intent);//跳转界面
 								}
 							}).start();
 							
@@ -134,54 +156,71 @@ public class MainActivity extends Activity {
 							// TODO Auto-generated method stub
 							view2=null;
 							
-						}
+					}
 						
 					});
 					builder.show();
 				}
-				
-				switch (position) {
-				case 1:
-					Toast.makeText(menu.getContext(), "开发中", Toast.LENGTH_SHORT).show();
-					break;
-				case 2:
-					Toast.makeText(menu.getContext(), "开发中", Toast.LENGTH_SHORT).show();
-					
-					break;
-				case 3:
-					Toast.makeText(menu.getContext(), "开发中", Toast.LENGTH_SHORT).show();
-					
-					break;
-				case 4:
-					Toast.makeText(menu.getContext(), "开发中", Toast.LENGTH_SHORT).show();
-					
-					break;
-				case 5:
-					Toast.makeText(menu.getContext(), "开发中", Toast.LENGTH_SHORT).show();
-					
-					break;
-				case 6:
-					Toast.makeText(menu.getContext(), "开发中", Toast.LENGTH_SHORT).show();
-					
-					break;
-				case 7:
-					Toast.makeText(menu.getContext(), "开发中", Toast.LENGTH_SHORT).show();
-					
-					break;
-				case 8:
-					Toast.makeText(menu.getContext(), "开发中", Toast.LENGTH_SHORT).show();
-					
-					break;
-				case 9:
+				if(menuBoole&&position==8){//设置
+					Toast.makeText(MainActivity.this, "开发中", Toast.LENGTH_LONG).show();
+					return ;
+				}
+				if(menuBoole&&position==9){//退出
 					System.exit(0);
-					break;
-
-				default:
-					break;
+				}
+				if(!menuBoole&&position==0){//如果非初始菜单下，恢复默认菜单
+					initList();
+					menuBoole=true; 
+				}
+				if(!menuBoole&&(position>0||position<8)){//如果非初始菜单下，则搜索相关内容并且跳转
+					md.setMs(2, parent.getAdapter().getItem(position).toString());
+					final Message msg=new Message();
+					final Intent intent = new Intent(menu.getContext(), MessageShowView.class);
+					final Bundle bundle = new Bundle();
+					bundle.putSerializable("list", (Serializable) lists);
+					intent.putExtra("position", -1);
+					intent.putExtra("edit", parent.getAdapter().getItem(position).toString());
+					new Thread(new Runnable() {
+						
+						@Override
+						public void run() {
+							// TODO Auto-generated method stub
+							msg.obj="请稍后，收集数据中(大概1分钟）";
+							msg.arg2=2;
+							msg.arg1=-1;
+							MainActivity.this.getImg(parent.getAdapter().getItem(position).toString());
+							MainActivity.this.handler.sendMessage(msg);
+							while (MainActivity.this.getKey()==-1) {
+							}
+							intent.putExtra("img", MainActivity.this.getImg());
+							MainActivity.this.setXF_Info(parent.getAdapter().getItem(position).toString());
+							while (MainActivity.this.getKey()==-1) {
+							}
+							List<Datas> list=MainActivity.this.getXF_Info();
+							bundle.putSerializable("info", (Serializable) list);
+							intent.putExtra("list", bundle);
+							menu.getContext().startActivity(intent);
+						}
+					}).start();
+				}
+				
+				if(menuBoole&&position!=0){//如果是初始菜单下，则搜索相关周目的信息
+					md.setMs(5, position+"");
+					Toast.makeText(MainActivity.this, "请稍后", Toast.LENGTH_SHORT).show();
+					menuBoole=false;
+					
 				}
 				
 			}
 		});
+	}
+	public int getTime(){//返回当前周次
+		Calendar ca = Calendar.getInstance();
+		Date date = new Date();
+		ca.setTime(date);
+		int st = ca.get(Calendar.DAY_OF_WEEK);
+		st=st-1;
+		return st;
 	}
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -190,23 +229,24 @@ public class MainActivity extends Activity {
 		setContentView(R.layout.activity_main);
 		initMenu();
 		Toast.makeText(this, "获取数据中，请稍后", Toast.LENGTH_LONG).show();
+		//初始化控件
 		listViewPager = (ViewPager) findViewById(R.id.vPager);
 		banner = (ViewPager) findViewById(R.id.vPager2);
 		banner_mask = (ViewPager) findViewById(R.id.vPager3);
 		tab_1 = (TextView) findViewById(R.id.text1);
 		tab_2 = (TextView) findViewById(R.id.text2);
 		tab_3 = (TextView) findViewById(R.id.text3);
+		//初始化三个空间容器
 		listViews = new ArrayList<View>();
 		listViews2 = new ArrayList<View>();
 		listVew_mask = new ArrayList<View>();
-		/*
-		 * Message message=new Message(); message.arg2=1;
-		 * handler.handleMessage(message);
-		 */
 		
+		//初始化三个Tab
 		tab_1.setOnClickListener(new tabClick(0));
 		tab_2.setOnClickListener(new tabClick(1));
 		tab_3.setOnClickListener(new tabClick(2));
+		
+		//tab三个图片的初始化
 		View v1, v2, v3;
 		LayoutInflater inflater;
 		inflater = getLayoutInflater();
@@ -221,11 +261,14 @@ public class MainActivity extends Activity {
 		v2 = inflater.inflate(R.layout.images_tm, null);
 		v3 = inflater.inflate(R.layout.images_tm, null);
 
+		//listVew_mask是用于控制Banner控件的，所以无显示图片
 		listVew_mask.add(v1);
 		listVew_mask.add(v2);
 		listVew_mask.add(v3);
 		banner.setAdapter(new MPA(listViews)); // banner用来显示，而无法交互
-		banner.setCurrentItem(0);
+		
+		banner.setCurrentItem(0); //用于控制显示第几张图，可以使用线程用来循环图片
+		
 		banner_mask.setAdapter(new MPA(listVew_mask));// banner_mask用来遮罩，不显示内容，但可交互，并且将同步操作banner
 		List<Datas> list = new ArrayList<Datas>();
 		listViews2.add(getList(R.layout.list_view_1, list));
@@ -236,7 +279,7 @@ public class MainActivity extends Activity {
 		listViewPager.setCurrentItem(0);
 		tab_1.setBackgroundResource(R.drawable.bj);
 
-		banner_mask.addOnPageChangeListener(new OnPageChangeListener() {
+		banner_mask.addOnPageChangeListener(new OnPageChangeListener() {//banner相关的监听，可以用来监听点击事件
 
 			@Override
 			public void onPageSelected(int arg0) {
@@ -258,7 +301,7 @@ public class MainActivity extends Activity {
 
 			}
 		});
-		listViewPager.addOnPageChangeListener(new OnPageChangeListener() {
+		listViewPager.addOnPageChangeListener(new OnPageChangeListener() {//tab与listView的同步
 
 			@Override
 			public void onPageSelected(int arg0) {
@@ -301,14 +344,14 @@ public class MainActivity extends Activity {
 		});
 	}
 	@Override
-	protected void onStart() {
+	protected void onStart() { //初始化数据，改方法之后可以加入logo屏蔽主界面用来等待数据
 		// TODO Auto-generated method stub
 		super.onStart();
 		md = new model(MainActivity.this);
 		md.setMs(0, "title=");
 	}
 	int key=-1;
-
+//用Key来表示数据是否读取完毕，-1表示完成，1表示正在等待数据
 	public void setKey(int key) {
 		this.key = key;
 	}
@@ -316,18 +359,22 @@ public class MainActivity extends Activity {
 	public int getKey() {
 		return key;
 	}
+	//设置图片链接，URL是图片真实链接
 	String img="";
 	public void setImg(String url){
 		key=1;
 		img=url;
 	}
+	//获取图片链接地址
 	public String getImg(){
 		key=-1;
 		return img;
 	}
+	//向服务器申请获取图片链接
 	public void getImg(String name){
 		md.setMs(4, name);
 	}
+	//显示昨今明的相关数据
 	public void showTitle(List<Datas> list) {
 		if (list == null) {
 			return;
@@ -370,14 +417,17 @@ public class MainActivity extends Activity {
 		listViewPager.setCurrentItem(1);
 
 	}
+	//向服务器申请该番剧
 	public void setXF_Info(String name){
 		md.setMs(2,name);
 	}
+	//获取了数据后，设置到DataList
 	List<Datas> DataList;
 	public void setXF_Info(List<Datas> list){
 		DataList=list;
 		setKey(1);
 	}
+	//获取番剧数据
 	public List<Datas> getXF_Info(){
 		setKey(-1);
 		return DataList;
@@ -395,7 +445,7 @@ public class MainActivity extends Activity {
 			if (msg.arg2 == 1) {
 
 			}
-			switch (msg.arg1) {
+			switch (msg.arg1) {//显示数据
 			case 0:
 				showTitle((List<Datas>) msg.obj);
 				break;
@@ -404,6 +454,7 @@ public class MainActivity extends Activity {
 				break;
 			case 2:
 				setXF_Info((List<Datas>)msg.obj);
+				
 				break;
 			case 3:
 
@@ -411,12 +462,21 @@ public class MainActivity extends Activity {
 			case 4:
 				setImg(((List<Datas>)msg.obj).get(0).getImg());
 				break;
-
+			case 5:
+				List<String> textList=new ArrayList<String>();
+				List<Datas> list=(List<Datas>) msg.obj;
+				textList.add("返回");
+				for (int i = 0; i < list.size(); i++) {
+					textList.add(list.get(i).getName());
+				}
+				ArrayAdapter<String> adapter=new ArrayAdapter<String>(menu.getContext(), android.R.layout.simple_list_item_1, textList);
+				listView.setAdapter(adapter);
+				break;
 			default:
 				break;
 			}
 
-			if (msg.arg2 == 2) {
+			if (msg.arg2 == 2) {//异常错误Toast显示
 				try {
 					Looper.prepare();
 				} catch (Exception e) {
@@ -457,7 +517,7 @@ public class MainActivity extends Activity {
 		}
 	};
 
-	class tabClick implements OnClickListener {
+	class tabClick implements OnClickListener {//tab的点击
 		int click = 0;
 
 		public tabClick(int click) {
@@ -475,7 +535,7 @@ public class MainActivity extends Activity {
 
 	List<Map<String, Object>> lists;
 
-	public View getList(int r, List<Datas> list) {
+	public View getList(int r, List<Datas> list) {//listView的初始化
 		LayoutInflater inflater = getLayoutInflater();
 		View v1;
 		v1 = inflater.inflate(r, null);

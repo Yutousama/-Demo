@@ -5,11 +5,12 @@ import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
 import java.io.Serializable;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -18,9 +19,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.content.Intent;
 import android.os.Message;
-import android.widget.Toast;
 
 public class model implements Serializable{
 	/**
@@ -32,6 +31,7 @@ public class model implements Serializable{
 	MainActivity activity;
 	Sockets sockets;
 	private int msg;
+	private int position;
 	public model(MainActivity activity) {
 		// TODO Auto-generated constructor stub
 		this.activity = activity;
@@ -56,6 +56,10 @@ public class model implements Serializable{
 			break;
 		case 4:
 			sockets.setSocketMsg("img="+str,msg);
+			break;
+		case 5:
+			position=Integer.valueOf(str);
+			sockets.setSocketMsg("zc=",msg);
 			break;
 		default:
 			break;
@@ -207,6 +211,23 @@ public class model implements Serializable{
 				datas3.setImg((String) array.get(0));
 				datas2.add(datas3);
 				return datas2;
+			case 5:
+				jsonObject=new JSONObject(array.getString(0));
+				List<Datas> datas4=new ArrayList<Datas>();
+				Datas datas5=new Datas();
+				Calendar ca = Calendar.getInstance();
+				Date date = new Date();
+				ca.setTime(date);
+				int st = ca.get(Calendar.DAY_OF_WEEK);
+				st=st-1;
+				JSONArray array2=new JSONArray(jsonObject.get("÷‹"+((position)+"")).toString());
+				for (int j = 0; j < array2.length(); j++) {
+					datas5.setName(array2.getString(j));
+					datas4.add(datas5);
+					datas5=new Datas();
+				}
+				datasList=datas4;
+				break;
 			default:
 				break;
 			}
